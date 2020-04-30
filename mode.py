@@ -127,6 +127,33 @@ class Mode06(Mode):
         '''
         pass
 
+    def set_high_condom_use(self):
+        '''
+        Set the person uses condom frequently.
+        '''
+        pass
+
+    def set_median_condom_use(self):
+        '''
+        Set the person uses condom frequently, around the median.
+        '''
+        pass
+
+    def set_low_condom_use(self):
+        '''
+        Set the person uses condom infrequently.
+        '''
+        pass
+
+    def infect_condom_use(self):
+        '''
+        By pass the act of sex when condom involved
+        '''
+        # new_beta_0 = self.beta - level * self.condom_rate
+        # new_beta_1 = self.beta - level * self.condom_rate 
+        # Max of beta if different compartment
+        pass
+
 
 
 

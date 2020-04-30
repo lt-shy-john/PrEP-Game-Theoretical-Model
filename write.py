@@ -7,7 +7,7 @@ def WriteStates(obs, filename):
     filename = str(filename)+'.csv'
     with open(filename, 'a', newline='', encoding='utf8') as f:
         writer = csv.writer(f)
-        writer.writerow([obs.S, obs.I, obs.V])
+        writer.writerow([obs.S, obs.I, obs.V, obs.R])
 
 def WriteOpinion(obs, filename):
     '''

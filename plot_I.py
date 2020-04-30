@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 T = 500
+gamma = 0.2
 
 x = np.linspace(0,T,num=T-1)
 df = pd.read_csv('data_beta0.8_2020-04-08hr.csv')

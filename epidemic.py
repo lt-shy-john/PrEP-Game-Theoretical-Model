@@ -58,6 +58,7 @@ class Epidemic:
             Get number of people who are in S, I or V state.
         '''
         self.S = 0
+        self.I = 0
         self.I1 = 0
         self.I2 = 0
         self.V = 0
@@ -133,6 +134,8 @@ class Epidemic:
 
     def vaccinate(self):
         for i in range(len(self.people)):
+            if self.people[i].suceptible == 1:
+                continue
             if self.people[i].opinion == 1 and random.uniform(0,1) <= self.vaccinated:
                 self.people[i].vaccinated = 1
 
@@ -142,7 +145,7 @@ class Epidemic:
         '''
         for i in range(len(self.people)):
             if self.people[i].vaccinated == 1:
-                return None
+                continue
             if self.people[i].suceptible == 1 and random.uniform(0,1) <= self.recover:
                 self.people[i].recovered = 1
 
@@ -150,12 +153,10 @@ class Epidemic:
         if self.epidemic == 0:
             # If eradicated, then there are no external transmissions.
             return
-        R_0 = self.infection/self.recover
-        trans_rate = R_0/(len(self.people)-self.I)
         for i in range(len(self.people)):
-            seed = random.randint(0,1000)/1000
-            if seed < trans_rate:
-                self.people[i].infected = 1
+            seed = random.randint(0,100)/100
+            if seed < 1/(len(self.people))*self.infection:
+                self.people[i].suceptible = 1
 
     def mate(self, pair):
         # Note: We are not assuming pair has 2 elements only. Will change var name to comp(onent).
@@ -203,17 +204,19 @@ class Epidemic:
             elif self.partner_nwk.network[i][1].suceptible == 1 and random.uniform(0,1) <= self.infection and self.partner_nwk.network[i][0].vaccinated == 0:
                 self.partner_nwk.network[i][0].suceptible = 1
 
-    def infection_clock(self):
+    def infection_clock(self, i):
         if self.people[i].infection_clock == 30*6 and self.people[i].suceptible == 1:
             # Move to I2
             self.people[i].reinfected = 1
+            self.people[i].recovered = 0
             self.people[i].infection_clock = 0
-            continue
+            return
 
         if self.people[i].infection_clock == 365*10 and self.people[i].reinfected == 1 and self.people[i].recovered == 0:
             # Back to I1 compartment
             self.people[i].reinfected = 0
-            self.people[i].infected = 1
+            self.people[i].suceptible = 1
+            self.people[i].recovered = 0
             self.people[i].infection_clock = 0
 
     def infected(self):
@@ -223,7 +226,7 @@ class Epidemic:
             else:
                 self.people[i].infection_clock = 0
 
-            self.infection_clock()
+            self.infection_clock(i)
 
 
     def reinfect(self):
@@ -231,9 +234,12 @@ class Epidemic:
         Wear off of treatment.
         '''
         for i in range(len(self.people)):
-            if self.people[i].susecptible == 1 and  random.uniform(0,1) <= self.resus:
-                self.people[i].treatment_warning += 1
-            elif self.people[i].susecptible == 1 and  random.uniform(0,1) > self.resus:
+            if self.people[i].suceptible == 1 and  random.uniform(0,1) <= self.resus:
+                if self.people[i].treatment_warning == None:
+                    self.people[i].treatment_warning = 1
+                else:
+                    self.people[i].treatment_warning += 1
+            elif self.people[i].suceptible == 1 and  random.uniform(0,1) > self.resus:
                 self.people[i].treatment_warning = None
 
             # Check if eligible to be reinfected
@@ -263,11 +269,12 @@ class Epidemic:
         self.get_states()
         self.set_pro_ag()
         self.natural_transmission()
-        self.vaccinate()
+        self.wear_off()
         self.recovery()
         self.infect()
-        self.wear_off()
+        self.vaccinate()
         self.infected()
+        self.reinfect()
         self.get_states()
         if filename != '':
             write.WriteStates(self, filename)

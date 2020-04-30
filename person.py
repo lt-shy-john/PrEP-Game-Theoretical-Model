@@ -10,7 +10,7 @@ class Person:
     def __init__(self, personality = 0):
         Person.id += 1  # Name of the person.
         self.id = Person.id
-        self.opinion = random.choices([0, 1], weights = [2, 8], k = 1)[0]
+        self.opinion = 1 #random.choices([0, 1], weights = [2, 8], k = 1)[0]
         self.meta_opinion = None
 
         self.group_no = None
@@ -26,6 +26,8 @@ class Person:
         self.reinfected = 0
         self.vaccinated = 0   # Assume all 0 (None of them took vaccine).
         self.recovered = 0  # 0 means not in R compartment, 1 is.
+
+        self.last_sex = 0  # Last time the person has sex.
         self.infection_clock = 0
         self.treatment_warning = None  # When 3, goes back to I2.
 
