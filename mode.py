@@ -1,3 +1,4 @@
+from person import Person
 import random
 import networkx as nx
 
@@ -21,9 +22,36 @@ class Mode:
         self.flag = ' '
 
 '''
-01: Living in city/ suburb
+01: Living in city/ suburb/ rural
 '''
 class Mode01(Mode):
+    '''
+    Attributes
+    ----------
+
+    '''
+
+    def __init__(self, people, partner_nwk):
+        super().__init__(people)
+        # Initially set partner living in the same region.
+        self.partner_nwk = partner_nwk
+        # Frequency of interaction. (City, Suburb, Rural)
+        self.interaction = [[0.6, 0.39, 0.01], [0.39, 0.51, 0.1], [0.01, 0.1, 0.89]]
+
+    def assign_regions(self):
+        weight = [4,5,1]
+        for pair in self.partner_nwk.network:
+            pair[0] = random.choices(list(range(3)), weights = weight, k=1)[0]
+            pair[1] = random.choices(list(range(3)), weights = weight, k=1)[0]
+
+    def __call__(self):
+        self.assign_regions()
+        self.raise_flag()
+
+'''
+02: Visit GP Sex clinic
+'''
+class Mode02(Mode):
     def __init__(self, people):
         super().__init__(people)
         self.f = 0
@@ -31,7 +59,7 @@ class Mode01(Mode):
         self.gp = 0
         self.sc = 0
 
-    def __call__(self):
+    def set_proportion(self):
         gp_temp = float(input('Proportion of people seeing a GP (Decimal): '))
         sc_temp = float(input('Proportion of people seeing a sex clinic (Decimal): '))
         print()
@@ -43,10 +71,43 @@ class Mode01(Mode):
             # Main code cont.
             self.gp = gp_temp
             self.sc = sc_temp
+
+    def __call__(self):
         if self.gp != 0 and self.sc != 0:
             self.raise_flag()
         else:
             self.drop_flag()
+
+    def raise_flag(self):
+        return super().raise_flag()
+
+    def drop_flag(self):
+        return super().drop_flag()
+
+
+'''
+04: Casual sex
+'''
+class Mode04(Mode):
+    def __init__(self, people, partner_nwk):
+        super().__init__(people)
+        self.partner_nwk = partner_nwk
+
+    def casual_sex(self, person):
+        '''Casual sex. Used in Epidemic class
+        '''
+        if type(person) != Person:
+            print('Error: person is not the correct type. Please check code.')
+            return
+
+        for other_person in self.people:
+            seed = random.randint(1000)/1000
+            if seed < self.partner_nwk.network.degree(other_person):
+                # print record
+                return (person,other_person)
+
+    def __call__(self):
+        self.raise_flag()
 
     def raise_flag(self):
         return super().raise_flag()
@@ -105,57 +166,153 @@ class Mode05(Mode):
             print('Agents are linked by "-" and pairs separated by space.')
             self.data = input('> ')
             self.read_data()
+            if self.data != '':
+                self.raise_flag()
 
             cmd = input('Do you want to leave?')
             if cmd == 'y':
                 return
 
+    def raise_flag(self):
+        return super().raise_flag()
+
+    def drop_flag(self):
+        return super().drop_flag()
+
 '''
 06: Risk compensation (%)
 '''
 class Mode06(Mode):
-    def __init__(self):
-        super().__init__()
-        self.condom_rate = 0.03  # Hard coded frequency of use condoms.
+    '''
+    Attributes
+    ----------
+    condom_rate: iterable of floats
+        Frequency of condoms. Highest, median and lowest.
+    '''
 
-    def set_condom_rate(input):
-        self.condom_rate = input
+    def __init__(self, people, partner_nwk):
+        super().__init__(people)
+        self.partner_nwk = partner_nwk
+        # Hard coded frequency of replacing condoms.
+        self.condom_rate = [0.85, 0.5, 0.03]
+        # Each agent has their own risk compensation (i.e. replacement of condoms)
 
-    def set_population(input):
+
+    def set_condom_rate(self):
+        for i in range(3):
+            try:
+                self.condom_rate[0] = float(input('High condom use rate:'))
+                self.condom_rate[1] = float(input('Median condom use rate:'))
+                self.condom_rate[2] = float(input('Low condom use rate:'))
+            except ValueError:
+                print('Wrong data type. Please check your data')
+                continue
+
+    def set_population(self,input = None):
         '''
         Set whom uses condom and their habits.
-        '''
-        pass
 
-    def set_high_condom_use(self):
-        '''
-        Set the person uses condom frequently.
-        '''
-        pass
+        parameter
+        ---------
+        input: iterable, optional
+            Define population and their condom use.
 
-    def set_median_condom_use(self):
-        '''
-        Set the person uses condom frequently, around the median.
-        '''
-        pass
+        Notes
+        -----
+        0 represents infrequent use of condom, 1 means user group lies in the median and 2 has the highest frequency.
 
-    def set_low_condom_use(self):
         '''
-        Set the person uses condom infrequently.
-        '''
-        pass
+        for person in self.people:
+            person.condom_group = random.randint(0,2)
 
-    def infect_condom_use(self):
+    def infect_condom_use(self, beta, sex_rate):
         '''
-        By pass the act of sex when condom involved
+        Sexual intercourse when condom involved. Overide the normal `Epidemic.infect()` function.
+
+        Parameters
+        ----------
+        sex_rate: float
+            From epidemic class. Represents population frequency of making sexual intercourse.
         '''
-        # new_beta_0 = self.beta - level * self.condom_rate
-        # new_beta_1 = self.beta - level * self.condom_rate 
-        # Max of beta if different compartment
-        pass
 
 
+        for pair in self.partner_nwk.network:
+            sex_seed = random.randint(0,1000)/1000
+            if sex_seed > sex_rate:
+                # Not making sex
+                continue
+            condom_seed = random.randint(0,1000)/1000
+            seed = random.randint(0,1000)/1000
+            condom_rate = max(self.condom_rate[pair[0].condom_group], self.condom_rate[pair[1].condom_group])
+            if condom_seed > condom_rate and seed < beta:
+                if pair[0].suceptible == 0 and pair[0].vaccinated == 0 and (pair[1].suceptible == 1 or pair[1].reinfected == 1 or pair[1].recovered == 1):
+                    pair[0].suceptible = 1
+                if pair[1].suceptible == 0 and pair[1].vaccinated == 0 and (pair[0].suceptible == 1 or pair[0].reinfected == 1 or pair[0].recovered == 1):
+                    pair[1].suceptible = 1
+                # Both party could be infected, so not `elif`.
 
+    def raise_flag(self):
+        return super().raise_flag()
+
+    def drop_flag(self):
+        return super().drop_flag()
+
+    def __call__(self):
+        try:
+            self.set_population()
+            # self.set_condom_rate()
+        except ValueError:
+            pass
+        self.raise_flag()
+
+'''
+21: Partner negotiates for sex
+'''
+class Mode21(Mode):
+    def __init__(self, people, partner_nwk):
+        super().__init__(people)
+        self.partner_nwk = partner_nwk
+        self.r = 0.5
+        self.rI = 0.8
+
+        # Trust factor of population
+        self.m = 1
+        self.mu = 2
+
+    def mate(self, pair):
+
+        if len(pair) > 1:
+            i = random.randint(0,len(pair)-1)  # Who is making the request
+            self.mu = 2
+        else:
+            return None
+        for j in range(len(pair)):
+            if i == j:
+                continue # Skip the person is deciding
+            # [Distrust, Abuse, Honour trust]
+            self.m = 1
+            Ej = [1,1,1]
+            Mj = [-self.rI,self.infection*self.rI,(1-self.infection)*self.r]
+            Kj = [self.m * (1 - self.infection) * self.r, self.m * self.infection * self.rI, self.m * (1-self.infection) * self.r]
+            max_utility = 0
+            option = None
+            for k in range(3):
+                if Ej[k]+Mj[k]+Kj[k] > max_utility:
+                    max_utility = Ej[k]+Mj[k]+Kj[k]
+                    option = k
+            if option == 0:
+                return None
+            # print(pair[j].id, max_utility, option)
+            if option == 2 and (pair[i].suceptible == 1 and pair[i].recovered == 0) or (pair[i].reinfected == 1 and pair[i].recovered == 0):
+                option = 1
+            if option == 1 or option == 2:
+                return option
+
+    def raise_flag(self):
+        return super().raise_flag()
+
+    def drop_flag(self):
+        return super().drop_flag()
 
 '''
 31: Include on demand PrEP.

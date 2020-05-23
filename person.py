@@ -13,6 +13,23 @@ class Person:
         self.opinion = 1 #random.choices([0, 1], weights = [2, 8], k = 1)[0]
         self.meta_opinion = None
 
+        self.location = 0
+        '''
+        0 - City
+        1 - Suburb
+        2 - Rural
+        '''
+
+        self.occupation = 0
+        '''
+        0 - Not specified
+        1 - Sex worker
+        '''
+
+        self.wealth = 1000
+        self.d_GP = 0
+        self.d_sc = None
+
         self.group_no = None
         '''
         Personality:
@@ -28,8 +45,16 @@ class Person:
         self.recovered = 0  # 0 means not in R compartment, 1 is.
 
         self.last_sex = 0  # Last time the person has sex.
+        self.sex_history = []
+        self.is_casual = False
         self.infection_clock = 0
+
+        self.treatment = 0
         self.treatment_warning = None  # When 3, goes back to I2.
+
+        self.condom_group = None  # Check mode 06 for information.
+        self.risk_compensation = 1
+        self.condom_history = []
 
         self.on_demand = None  # See Mode31 class for more information.
         self.mated_marker = None
