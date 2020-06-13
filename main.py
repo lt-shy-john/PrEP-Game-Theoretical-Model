@@ -1,6 +1,6 @@
 # Import libraries
 import sys
-
+# import time
 
 # Import class files
 from person import Person
@@ -212,6 +212,8 @@ def set_mode(mode):
         print('32: Population on demand PrEP had planned sex. []')
         print('41: Moral hazard of PrEP []')
         print('42: Moral hazard of treatment []')
+        print('51: Erdos-Renyi topology []')
+        print('52: Preferential attachment []')
         print('Input number codes to change the options.')
         mode_input = input('> ')
         mode = mode_settings(mode_input, mode)
@@ -273,8 +275,16 @@ def mode_settings(cmd, mode=None):
                     mode.pop(31)
     return mode
 
-def mode_settings_express(cmd):
-    return mode
+def find_mode(code, mode_master_list):
+    for mode in mode_master_list:
+        if mode.code == code:
+            return mode
+
+def six_config(a, b, c):
+    print('Success')
+
+def seven_config(a, b, c):
+    print('{}: Success'.format(c))
 
 def export(filename):
     print('Coming soon')
@@ -337,12 +347,21 @@ phi_T = 0.95
 population = Person.make_population(N)
 partner_nwk = Partner(population)
 filename = ''  # Default file name to export (.csv). Change when use prompt 'export' cmd.
+
+mode_master_list = []
+# All objects should add into mode_master_list
 mode01 = mode.Mode01(population, partner_nwk)
 mode02 = mode.Mode02(population)
+mode04 = mode.Mode04(population, partner_nwk)
 mode05 = mode.Mode05(population, partner_nwk)
 mode06 = mode.Mode06(population, partner_nwk)
 mode21 = mode.Mode21(population, partner_nwk)
 mode31 = mode.Mode31(population)
+mode_master_list = [mode01, mode02, mode04, mode05, mode06,
+mode21,
+mode31]
+
+
 modes = {}
 
 '''
@@ -353,32 +372,85 @@ Loads the settings prior to the run. Optional keyword 'run' to run the simulatio
 # Check if mode exists
 for i in range(len(sys.argv)):
     try:
-        if sys.argv[-1] == '-m':
-            raise ValueError
+        if sys.argv[i] == '-m':
+            for j in range(i+1,len(sys.argv)):
+                # Skip at other options
+                if sys.argv[j][:2] == '--':
+                    mode_flag = int(sys.argv[j][2:])
+                    print('Mode: {}'.format(mode_flag))
+
+                    # Loop through config values
+                    for k in range(j+1,len(sys.argv)):
+                        if sys.argv[k][0] == '-' and sys.argv[k][1].isalpha():
+                            break
+                        if sys.argv[k][:2] == '--':
+                            break
+
+                        # Set up individual modes
+                        if mode_flag == 1:
+                            # Placeholder
+                            # print(sys.argv[k])
+                            pass
+                        elif mode_flag == 6:
+                            # Set weight [---w]
+                            if sys.argv[k][:3] == '*r=':
+                                mode06_r_config = sys.argv[k][3:].split(',')
+                                if len(mode06_r_config) == 3:
+                                    mode06.set_condom_rate(int(mode06_r_config[0]), int(mode06_r_config[1]), int(mode06_r_config[2]))
+                                elif len(mode06_r_config) == 2:
+                                    # No optional argument
+                                    mode06.set_condom_rate(int(mode06_r_config[0]), int(mode06_r_config[1]))
+                            if sys.argv[k][:3] == '*p=':
+                                mode06_p_config = sys.argv[k][3:].split(',')
+                                if len(mode06_p_config) == 0 or mode06_p_config == ['']:
+                                    print('No data of condom use proportion, skip this step.')
+                                    break
+
+                                for i in range(len(mode06_p_config)):
+                                    try:
+                                        mode06_p_config[i] = float(mode06_p_config[i])
+                                    except ValueError:
+                                        print('Invalid condom use proportion data.')
+                                        mode06_p_config[i] = 0
+
+                                if sum(mode06_p_config) != 1:
+                                    print('Condom use proportion unable to normalise, changed to default value.')
+                                    mode06_p_config = [3,4,3]
+
+                                mode06.set_population(input=mode06_p_config)
+
+                                mode06()
+                                if mode06.flag == 'X':
+                                    modes[6] = mode06
+                                else:
+                                    mode.pop(6)
+
+                        # elif mode_flag == 7:
+                        #     # There are 3 args with last one characters
+                        #     seven_config(*[int(data) if data.isnumeric() else data for data in config])
+                    continue
+                if sys.argv[j][0] == '-' and sys.argv[j][1].isalpha():
+                    break
+                if sys.argv[j] == 'run':
+                    break
+                # print(mode_flag, '*'+str(argv[j]))
     except ValueError:
-        print('No mode codes provided. Please check your inputs.')
-        quit()
+        print('Invalid input. Check your arguments. ')
+        continue
+    except IndexError:
+        break
 
-    if sys.argv[i] == '-m' and sys.argv[i+1] != 'run':
-        modes = mode_settings_express(mode_cmd)
-    elif sys.argv[i] == '-m' and sys.argv[i+1] != 'run':
-        print('"Run" is not a valid mode code.')
-        quit()
-
-# Check file name to export
-for i in range(len(sys.argv)):
+    # Check file name to export
     try:
-        if sys.argv[-1] == '-f':
-            raise ValueError
+        if sys.argv[i] == '-f':
+            if sys.argv[i+1] == 'run':
+                raise ValueError
+            filename = sys.argv[i+1]
     except ValueError:
         print('No file name provided. Please check your inputs.')
-        quit()
-
-    if sys.argv[i] == '-f' and sys.argv[i+1] != 'run':
-        filename = sys.argv[i+1]
-    elif sys.argv[i] == '-f' and sys.argv[i+1] == 'run':
-        print('"Run" is not a valid file name for export.')
-        quit()
+        continue
+    except IndexError:
+        break
 
 if sys.argv[-1] == 'run':
     print('===== Simulation Running =====')

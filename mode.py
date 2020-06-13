@@ -3,7 +3,8 @@ import random
 import networkx as nx
 
 class Mode:
-    def __init__(self, people):
+    def __init__(self, people, code):
+        self.code = code
         # Flag to alert setting has been loaded.
         self.flag = ' '   # If loaded then has value 'X'.
         # Population objects
@@ -32,17 +33,69 @@ class Mode01(Mode):
     '''
 
     def __init__(self, people, partner_nwk):
-        super().__init__(people)
+        super().__init__(people,1)
         # Initially set partner living in the same region.
         self.partner_nwk = partner_nwk
         # Frequency of interaction. (City, Suburb, Rural)
         self.interaction = [[0.6, 0.39, 0.01], [0.39, 0.51, 0.1], [0.01, 0.1, 0.89]]
+        self.weight = [4,5,1]
+
+    def set_interaction(self, cc, cs, ss, cr = 0, sr = 0, rr = 0):
+        '''Set interaction rate between different regions
+        '''
+        self.interaction[0][0] = cc
+        self.interaction[1][1] = ss
+        self.interaction[2][2] = rr
+        self.interaction[0][1] = self.interaction[1][0] = cs
+        self.interaction[0][2] = self.interaction[2][0] = cr
+        self.interaction[1][2] = self.interaction[2][1] = sr
+
+        check_interaction_integrity(cc, cs, ss, cr, sr, rr)
+
+    def check_interaction_integrity(self):
+        ''' Check if rows are more than 1, less than 1 and if they are symmetric.
+        '''
+        for row in self.interaction:
+            if sum(row) > 1:
+                raise ValueError
+
+        for i in range(len(self.interaction)):
+            if sum(self.interaction[i]) < 1:
+                if self.interaction[i][2] == 0:
+                    self.interaction[i][1] = 1 - self.interaction[i][0]
+                else:
+                    self.interaction[i][1] = 1 - self.interaction[i][0] - self.interaction[i][2]
+
+        for i in range(len(self.interaction)):
+            for j in range(len(self.interaction[i])):
+                if self.interaction[i][j] != self.interaction[j][i]:
+                    self.interaction[i][j] = self.interaction[j][i]
+
+    def set_weight(self, c, s, r=0):
+        self.weight = [c,s,r]
+        self.check_weight_integrity()
+
+    def check_weight_integrity(self):
+        if self.weight[2] == 0:
+            if sum(self.weight) > 1:
+                print('Warning: Weights too much. Set uniform proportion for city and suburban proportion. ')
+                self.weight[0] = self.weight[1] = 5
+            elif sum(self.weight) < 1:
+                self.weight[1] = 1 - self.weight[0]
+        else:
+            if sum(self.weight) > 1:
+                print('Warning: Weights too much. ')
+                self.weight[0] = 5
+                self.weight[1] = 4
+                self.weight[2] = 1
+            elif  sum(self.weight) < 1:
+                self.weight[1] = 1 - self.weight[0] - self.weight[2]
+
 
     def assign_regions(self):
-        weight = [4,5,1]
         for pair in self.partner_nwk.network:
-            pair[0] = random.choices(list(range(3)), weights = weight, k=1)[0]
-            pair[1] = random.choices(list(range(3)), weights = weight, k=1)[0]
+            pair[0] = random.choices(list(range(3)), weights = self.weight, k=1)[0]
+            pair[1] = random.choices(list(range(3)), weights = self.weight, k=1)[0]
 
     def __call__(self):
         self.assign_regions()
@@ -53,16 +106,13 @@ class Mode01(Mode):
 '''
 class Mode02(Mode):
     def __init__(self, people):
-        super().__init__(people)
+        super().__init__(people,2)
         self.f = 0
         # Proportion of agents seeing a GP or sex clinic
         self.gp = 0
         self.sc = 0
 
-    def set_proportion(self):
-        gp_temp = float(input('Proportion of people seeing a GP (Decimal): '))
-        sc_temp = float(input('Proportion of people seeing a sex clinic (Decimal): '))
-        print()
+    def set_proportion(self, gp_temp, sc_temp = 0):
         if gp_temp + sc_temp > 1:
             print('Check your input values.')
         elif gp_temp == '' or sc_temp == '':
@@ -90,7 +140,7 @@ class Mode02(Mode):
 '''
 class Mode04(Mode):
     def __init__(self, people, partner_nwk):
-        super().__init__(people)
+        super().__init__(people,4)
         self.partner_nwk = partner_nwk
 
     def casual_sex(self, person):
@@ -121,7 +171,7 @@ class Mode04(Mode):
 '''
 class Mode05(Mode):
     def __init__(self, people, g):
-        super().__init__(people)
+        super().__init__(people,5)
         self.g = g   # Import from Partner object. Graph of social network
         self.data = None # User requests to change social network topology
 
@@ -191,22 +241,33 @@ class Mode06(Mode):
     '''
 
     def __init__(self, people, partner_nwk):
-        super().__init__(people)
+        super().__init__(people,6)
         self.partner_nwk = partner_nwk
         # Hard coded frequency of replacing condoms.
         self.condom_rate = [0.85, 0.5, 0.03]
         # Each agent has their own risk compensation (i.e. replacement of condoms)
 
 
-    def set_condom_rate(self):
-        for i in range(3):
-            try:
-                self.condom_rate[0] = float(input('High condom use rate:'))
-                self.condom_rate[1] = float(input('Median condom use rate:'))
-                self.condom_rate[2] = float(input('Low condom use rate:'))
-            except ValueError:
-                print('Wrong data type. Please check your data')
-                continue
+    def set_condom_rate(self, h, m, l=0):
+        try:
+            self.condom_rate[0] = float(h)
+            self.condom_rate[1] = float(m)
+            self.condom_rate[2] = float(l)
+
+            # Sort the list to descending order
+            self.condom_rate.sort(reverse=True)
+
+            # Check sum if they are normalised
+            if sum(self.condom_rate) < 1:
+                print('Sum of condom rate is less than 1. Please check your inputs.')
+                self.condom_rate[1] = 1 - self.condom_rate[0]
+                self.condom_rate[2] = 0
+            elif sum(self.condom_rate) > 1:
+                print('Sum of condom rate is greater than 1. Please check your inputs.')
+                self.condom_rate = [0.8, 0.15, 0.05]
+
+        except ValueError:
+            print('Wrong data type. Please check your data')
 
     def set_population(self,input = None):
         '''
@@ -215,7 +276,7 @@ class Mode06(Mode):
         parameter
         ---------
         input: iterable, optional
-            Define population and their condom use.
+            Define frequency and their condom use.
 
         Notes
         -----
@@ -257,6 +318,11 @@ class Mode06(Mode):
     def drop_flag(self):
         return super().drop_flag()
 
+    def express_setup(self):
+        '''Setup custom parameters from express mode
+        '''
+        pass
+
     def __call__(self):
         try:
             self.set_population()
@@ -270,7 +336,7 @@ class Mode06(Mode):
 '''
 class Mode21(Mode):
     def __init__(self, people, partner_nwk):
-        super().__init__(people)
+        super().__init__(people,21)
         self.partner_nwk = partner_nwk
         self.r = 0.5
         self.rI = 0.8
@@ -319,7 +385,7 @@ class Mode21(Mode):
 '''
 class Mode31(Mode):
     def __init__(self, people):
-        super().__init__(people)
+        super().__init__(people,31)
 
         # Proportion of agents that takes on demand PrEP
         self.p = 0
@@ -329,6 +395,14 @@ class Mode31(Mode):
 
     def drop_flag(self):
         return super().drop_flag()
+
+    def set_p(self, p):
+        if p > 1:
+            self.p = 1
+        elif p < 0:
+            self.p = 0
+        else:
+            self.p = p
 
     def init_on_demand_PrEP(self, person_id):
         '''
@@ -389,3 +463,72 @@ class Mode31(Mode):
             self.drop_flag()
         else:
             self.raise_flag()
+
+'''
+51: Erdos-Renyi topology
+'''
+class Mode51(Mode):
+    def __init__(self, people, partner_nwk):
+        super().__init__(people,51)
+        # Initially set partner living in the same region.
+        self.partner_nwk = partner_nwk
+        self.partner_nwk.network = None
+        self.partner_nwk.nwk_graph = None
+        self.p = 0.1  # Pairing probability
+
+    def set_network(self):
+        self.partner_nwk.nwk_graph = nx.generators.random_graphs.erdos_renyi_graph(len(self.people), self.p)
+
+        # Relabel nodes to People objects
+        self.partner_nwk.nwk_graph = nx.relabel_nodes(g, mapping)
+
+        # Random pair people with no partners with other partners
+        for node in self.partner_nwk.nwk_graph.nodes:
+            if self.partner_nwk.nwk_graph.degree(node) == 0:
+                random_node = random.choice(list(self.partner_nwk.nwk_graph.nodes()))
+                self.partner_nwk.nwk_graph.add_edge(node, random_node)
+
+    def set_p(self, p):
+        if p > 1:
+            self.p = 1
+        elif p < 0:
+            self.p = 0
+        else:
+            self.p = p
+
+    def raise_flag(self):
+        return super().raise_flag()
+
+    def drop_flag(self):
+        return super().drop_flag()
+
+
+'''
+52: Preferential attachment.
+'''
+class Mode52(Mode):
+    def __init__(self, people, partner_nwk):
+        super().__init__(people,52)
+        # Initially set partner living in the same region.
+        self.partner_nwk = partner_nwk
+        self.partner_nwk.network = None
+        self.partner_nwk.nwk_graph = None
+        self.m = 1  # Pairing probability
+
+    def set_network(self):
+        self.partner_nwk.nwk_graph = nx.generators.random_graphs.barabasi_albert_graph(len(self.people), self.m)
+
+        # Relabel nodes to People objects
+        self.partner_nwk.nwk_graph = nx.relabel_nodes(g, mapping)
+
+    def set_m(self, m):
+        if m < 1 or m < 0:
+            self.m = 1
+        else:
+            self.m = m
+
+    def raise_flag(self):
+        return super().raise_flag()
+
+    def drop_flag(self):
+        return super().drop_flag()
