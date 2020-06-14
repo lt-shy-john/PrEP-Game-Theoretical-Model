@@ -105,6 +105,13 @@ def summary():
     info = input('Information about the parameters? [y/n] ').lower()
     if info == 'y':
         info_summ()
+    print()
+    if len(modes) > 0:
+        info = input('There are customised settings. View them? [y/n] ')
+        if info == 'y':
+            for mode in modes.values():
+                print(mode.__dict__)
+    print()
 
 def show_nwk():
     try:
@@ -128,6 +135,31 @@ def help():
     print('MODE - Change mode settings.')
     print('SUMMARY - Print the simulation parameters.')
     print('QUIT/ Q - Quit the software.')
+
+def usage():
+    print('Usage: python3 main.py (N) (T) (alpha) (beta) (gamma) (phi) ...\n\
+    [-m]  <modes_config>] [-f (filename)] [run]\n')
+    print('-m \t Mode')
+    print('  --1 \t Mode 01: Living in city/ suburb/ rural.')
+    print('  --2 \t Mode 02: Visit GP/ Sex clinic.')
+    print('  --3 \t Mode 03: Age groups (elder/ young).')
+    print('  --4 \t Mode 04: Casual sex.')
+    print('  --5 \t Mode 05: Edit partner network.')
+    print('  --6 \t Mode 06: Condom risk compensation (%).')
+    print('  --7 \t Mode 07: Include sex workers.')
+    print('  --10 \t Mode 10: Add cost of PrEP.')
+    print('  --21 \t Mode 21: Partner negotiates for sex.')
+    print('  --22 \t Mode 22: Stubbon to take PrEP.')
+    print('  --24 \t Mode 24: Contrary to social groups.')
+    print('  --31 \t Mode 31: Include on demand PrEP.')
+    print('  --32 \t Mode 32: Population on demand PrEP had planned sex.')
+    print('  --41 \t Mode 41: Moral hazard of PrEP.')
+    print('  --42 \t Mode 42: Moral hazard of treatment.')
+    print('  --51 \t Mode 51: Erdos-Renyi topology.')
+    print('  --52 \t Mode 52: Preferential attachment.')
+    print('-f \t Export (.csv) file name.')
+    print('-h \t Usage.')
+    print('run \t Run simulation.')
 
 def correct_para(p, pos=False):
     '''
@@ -280,12 +312,6 @@ def find_mode(code, mode_master_list):
         if mode.code == code:
             return mode
 
-def six_config(a, b, c):
-    print('Success')
-
-def seven_config(a, b, c):
-    print('{}: Success'.format(c))
-
 def export(filename):
     print('Coming soon')
 
@@ -293,6 +319,11 @@ print('  ======================================  \n\n')
 print('  Agent Based Modelling: PrEP SIRP Model  \n\n')
 print('  ======================================  ')
 print()
+# Express mode: Call usage information
+if len(sys.argv) == 2 and (sys.argv[1] == '-help' or sys.argv[1] == '-h'):
+    usage()
+    quit()
+
 if len(sys.argv) == 1:
     N = input('Number of people (N): ')
     N = correct_para(N, pos=True)
@@ -317,7 +348,7 @@ elif len(sys.argv) > 1:
         phi = correct_epi_para(sys.argv[6])
     except:
         print('Exception encountered. Leaving program...')
-        print('Usage: python3 main.py [N] [T] [alpha] [beta] [gamma] [phi] ...\n       [-m modes] [-f filename] [run]\n')
+        print('Usage: python3 main.py (N) (T) (alpha) (beta) (gamma) (phi) ...\n[-m <modes_config>] [-f (filename)] [run]\n')
         quit()
 print()
 
@@ -369,6 +400,7 @@ Express mode
 
 Loads the settings prior to the run. Optional keyword 'run' to run the simulation automatically.
 '''
+
 # Check if mode exists
 for i in range(len(sys.argv)):
     try:
