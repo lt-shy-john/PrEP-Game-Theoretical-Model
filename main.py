@@ -244,8 +244,8 @@ def set_mode(mode):
         print('32: Population on demand PrEP had planned sex. []')
         print('41: Moral hazard of PrEP []')
         print('42: Moral hazard of treatment []')
-        print('51: Erdos-Renyi topology []')
-        print('52: Preferential attachment []')
+        print('51: Erdos-Renyi topology [{}]'.format(mode51.flag))
+        print('52: Preferential attachment [{}]'.format(mode52.flag))
         print('Input number codes to change the options.')
         mode_input = input('> ')
         mode = mode_settings(mode_input, mode)
@@ -305,6 +305,24 @@ def mode_settings(cmd, mode=None):
                     mode[31] = mode31
                 else:
                     mode.pop(31)
+            elif int(cmd[i]) == 51:
+                if 52 in cmd:
+                    print('Mode 52 has been activated. Mode 51 unable to start.')
+                    break
+                mode51()
+                if mode51.flag == 'X':
+                    mode[51] = mode51
+                else:
+                    mode.pop(51)
+            elif int(cmd[i]) == 52:
+                if 51 in cmd:
+                    print('Mode 51 has been activated. Mode 52 unable to start.')
+                    break
+                mode52()
+                if mode52.flag == 'X':
+                    mode[52] = mode52
+                else:
+                    mode.pop(52)
     return mode
 
 def find_mode(code, mode_master_list):
@@ -388,6 +406,8 @@ mode05 = mode.Mode05(population, partner_nwk)
 mode06 = mode.Mode06(population, partner_nwk)
 mode21 = mode.Mode21(population, partner_nwk)
 mode31 = mode.Mode31(population)
+mode51 = mode.Mode51(population, partner_nwk)
+mode52 = mode.Mode52(population, partner_nwk)
 mode_master_list = [mode01, mode02, mode04, mode05, mode06,
 mode21,
 mode31]
@@ -410,6 +430,35 @@ for i in range(len(sys.argv)):
                 if sys.argv[j][:2] == '--':
                     mode_flag = int(sys.argv[j][2:])
                     print('Mode: {}'.format(mode_flag))
+
+                    # Activate modes with no options needed
+                    if mode_flag == 1:
+                        pass
+                    elif mode_flag == 6:
+                        mode06.set_population()
+                        mode06()
+                        if mode06.flag == 'X':
+                            modes[6] = mode06
+                        else:
+                            mode.pop(6)
+                    elif mode_flag == 51:
+                        if 52 in modes:
+                            print('Mode 52 has been activated. Ignore mode 51. ')
+                            break
+                        mode51()
+                        if mode51.flag == 'X':
+                            modes[51] = mode51
+                        else:
+                            mode.pop(51)
+                    elif mode_flag == 52:
+                        if 51 in modes:
+                            print('Mode 51 has been activated. Ignore mode 51. ')
+                            break
+                        mode52()
+                        if mode52.flag == 'X':
+                            modes[52] = mode52
+                        else:
+                            mode.pop(52)
 
                     # Loop through config values
                     for k in range(j+1,len(sys.argv)):
@@ -456,6 +505,7 @@ for i in range(len(sys.argv)):
                                     modes[6] = mode06
                                 else:
                                     mode.pop(6)
+
 
                         # elif mode_flag == 7:
                         #     # There are 3 args with last one characters

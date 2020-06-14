@@ -480,7 +480,8 @@ class Mode51(Mode):
         self.partner_nwk.nwk_graph = nx.generators.random_graphs.erdos_renyi_graph(len(self.people), self.p)
 
         # Relabel nodes to People objects
-        self.partner_nwk.nwk_graph = nx.relabel_nodes(g, mapping)
+        mapping = {node: self.people[node] for node in self.partner_nwk.nwk_graph}
+        self.partner_nwk.nwk_graph = nx.relabel_nodes(self.partner_nwk.nwk_graph, mapping)
 
         # Random pair people with no partners with other partners
         for node in self.partner_nwk.nwk_graph.nodes:
@@ -501,6 +502,11 @@ class Mode51(Mode):
 
     def drop_flag(self):
         return super().drop_flag()
+
+    def __call__(self):
+        self.set_network()
+        self.raise_flag()
+        print('E-R graph settings done.')
 
 
 '''
@@ -532,3 +538,7 @@ class Mode52(Mode):
 
     def drop_flag(self):
         return super().drop_flag()
+
+    def __call__(self):
+        self.set_network()
+        self.raise_flag()
