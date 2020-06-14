@@ -72,6 +72,8 @@ class Simulation:
         print()
         if self.filename != '':
             print('Data stored in \'{}.csv\''.format(self.filename))
+            write.WriteNetwork(self.partner_nwk.nwk_graph,self.filename)
+            print('Graph data stored in \'{}.graphml\''.format(self.filename))
         print('Relationship topology is ready for view.\n')
         print('')
 

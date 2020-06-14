@@ -1,4 +1,5 @@
 import csv
+import networkx as nx
 
 def WriteStates(obs, filename):
     '''
@@ -42,3 +43,11 @@ def WriteOpinionPersonality(obs, filename):
             writer = csv.writer(f)
             writer.writerow([obs.people[i].group_no, obs.people[i].id, obs.people[i].personality, obs.people[i].opinion])
         filename = ''
+
+def WriteNetwork(graph_obj, filename):
+    export_graph = graph_obj
+    mapping = {}
+    for node in graph_obj.nodes:
+        mapping[node] = node.id
+    export_graph = nx.relabel_nodes(export_graph, mapping)
+    nx.write_graphml(export_graph, filename+'.graphml')
