@@ -301,6 +301,8 @@ class Mode06(Mode):
             sex_seed = random.randint(0,1000)/1000
             if sex_seed > sex_rate:
                 # Not making sex
+                pair[0].condom_history.append(0)
+                pair[1].condom_history.append(0)
                 continue
             condom_seed = random.randint(0,1000)/1000
             seed = random.randint(0,1000)/1000
@@ -312,16 +314,22 @@ class Mode06(Mode):
                     pair[1].suceptible = 1
                 # Both party could be infected, so not `elif`.
 
+                # Write their history (no condom)
+                pair[0].condom_history.append(0)
+                pair[1].condom_history.append(0)
+                # Debug check (copy this to other parts if needed)
+                # print('Condom history: {}: {} and {}: {}'.format(pair[0].id, pair[0].condom_history, pair[1].id, pair[1].condom_history))
+            else:
+                # Write their history (wore condom)
+                pair[0].condom_history.append(1)
+                pair[1].condom_history.append(1)
+
+
     def raise_flag(self):
         return super().raise_flag()
 
     def drop_flag(self):
         return super().drop_flag()
-
-    def express_setup(self):
-        '''Setup custom parameters from express mode
-        '''
-        pass
 
     def __call__(self):
         try:
@@ -472,8 +480,6 @@ class Mode51(Mode):
         super().__init__(people,51)
         # Initially set partner living in the same region.
         self.partner_nwk = partner_nwk
-        self.partner_nwk.network = None
-        self.partner_nwk.nwk_graph = None
         self.p = 0.1  # Pairing probability
 
     def set_network(self):
@@ -517,8 +523,6 @@ class Mode52(Mode):
         super().__init__(people,52)
         # Initially set partner living in the same region.
         self.partner_nwk = partner_nwk
-        self.partner_nwk.network = None
-        self.partner_nwk.nwk_graph = None
         self.m = 1  # Pairing probability
 
     def set_network(self):

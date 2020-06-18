@@ -129,10 +129,11 @@ def info_summ():
     print('Phi - Protection wear off rate.')
 
 def help():
+    print('LOOK - View partner network.')
+    print('MODE - Change mode settings.')
     print('RUN/ START - Start the simulation.')
     print('SETTING - Set simulation settings.')
     print('OTHER SETTING - Set auxillary simulation parameters.')
-    print('MODE - Change mode settings.')
     print('SUMMARY - Print the simulation parameters.')
     print('QUIT/ Q - Quit the software.')
 
@@ -408,6 +409,7 @@ mode21 = mode.Mode21(population, partner_nwk)
 mode31 = mode.Mode31(population)
 mode51 = mode.Mode51(population, partner_nwk)
 mode52 = mode.Mode52(population, partner_nwk)
+
 mode_master_list = [mode01, mode02, mode04, mode05, mode06,
 mode21,
 mode31]
@@ -440,7 +442,7 @@ for i in range(len(sys.argv)):
                         if mode06.flag == 'X':
                             modes[6] = mode06
                         else:
-                            mode.pop(6)
+                            modes.pop(6)
                     elif mode_flag == 51:
                         if 52 in modes:
                             print('Mode 52 has been activated. Ignore mode 51. ')
@@ -449,10 +451,10 @@ for i in range(len(sys.argv)):
                         if mode51.flag == 'X':
                             modes[51] = mode51
                         else:
-                            mode.pop(51)
+                            modes.pop(51)
                     elif mode_flag == 52:
                         if 51 in modes:
-                            print('Mode 51 has been activated. Ignore mode 51. ')
+                            print('Mode 51 has been activated. Ignore mode 52. ')
                             break
                         mode52()
                         if mode52.flag == 'X':
@@ -537,6 +539,11 @@ for i in range(len(sys.argv)):
 if sys.argv[-1] == 'run':
     print('===== Simulation Running =====')
     current_run = Simulation(population, T, population, partner_nwk, alpha, beta, gamma, phi, filename, alpha_V, alpha_T, beta_SS, beta_II, beta_RR, beta_VV, beta_IR, beta_SR, beta_SV, beta_PI, beta_IV, beta_RV, beta_condom, beta_SI2, beta_II2, beta_RI2, beta_VI2)
+    # Load modes
+    current_run.load_modes(modes)
+    if len(modes) > 0:
+        print('\nMode objects loaded.\n')
+    # Run
     current_run()
     print('=====  Simulation Ended  =====')
     print('\nSee you!')

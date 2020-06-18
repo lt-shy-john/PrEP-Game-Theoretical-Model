@@ -51,3 +51,29 @@ def WriteNetwork(graph_obj, filename):
         mapping[node] = node.id
     export_graph = nx.relabel_nodes(export_graph, mapping)
     nx.write_graphml(export_graph, filename+'.graphml')
+
+def WriteSex(obs, filename):
+    filename = str(filename)+'-sex.csv'
+    # Generate all agents's move in a row.
+    sex_data = []
+    for i in range(len(obs.people)):
+        # print('{}: {}'.format(obs.people[i].id, obs.people[i].sex_history))
+        sex_data.append(obs.people[i].sex_history[-1])
+
+    with open(filename, 'a', newline='', encoding='utf8') as f:
+        writer = csv.writer(f)
+        writer.writerow(sex_data)
+    condom_data = []
+
+def WriteCondom(obs, filename):
+    filename = str(filename)+'-condom.csv'
+    # Generate all agents's move in a row.
+    condom_data = []
+    for i in range(len(obs.people)):
+        # print('{}: {}'.format(obs.people[i].id, obs.people[i].condom_history))
+        condom_data.append(obs.people[i].condom_history[-1])
+
+    with open(filename, 'a', newline='', encoding='utf8') as f:
+        writer = csv.writer(f)
+        writer.writerow(condom_data)
+    condom_data = []
