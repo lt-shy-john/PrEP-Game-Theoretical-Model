@@ -243,7 +243,9 @@ class Mode06(Mode):
     def __init__(self, people, partner_nwk):
         super().__init__(people,6)
         self.partner_nwk = partner_nwk
-        # Hard coded frequency of replacing condoms.
+        # Proportion of condom usage groups.
+        self.condom_proportion = [0.34, 0.33, 0.33]
+        # Frequency of replacing condoms.
         self.condom_rate = [0.85, 0.5, 0.03]
         # Each agent has their own risk compensation (i.e. replacement of condoms)
 
@@ -269,7 +271,7 @@ class Mode06(Mode):
         except ValueError:
             print('Wrong data type. Please check your data')
 
-    def set_population(self,input = None):
+    def set_population(self):
         '''
         Set whom uses condom and their habits.
 
@@ -284,7 +286,7 @@ class Mode06(Mode):
 
         '''
         for person in self.people:
-            person.condom_group = random.randint(0,2)
+            person.condom_group = random.choices(list(range(3)), weights = self.condom_proportion, k=1)[0]
 
     def infect_condom_use(self, beta, sex_rate):
         '''

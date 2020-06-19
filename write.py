@@ -1,5 +1,6 @@
 import csv
 import networkx as nx
+import datetime
 
 def WriteStates(obs, filename):
     '''
@@ -66,6 +67,16 @@ def WriteSex(obs, filename):
     condom_data = []
 
 def WriteCondom(obs, filename):
+    '''
+    Save condom simulation data.
+
+    Parameters
+    ----------
+    obs: Epidemic
+        Accepts Epidemic object
+    filename: str
+        File name for export
+    '''
     filename = str(filename)+'-condom.csv'
     # Generate all agents's move in a row.
     condom_data = []
@@ -77,3 +88,41 @@ def WriteCondom(obs, filename):
         writer = csv.writer(f)
         writer.writerow(condom_data)
     condom_data = []
+
+def WriteCondomData(obs):
+    '''
+    Save basic condom data.
+
+    Parameters
+    ----------
+    obs: Simulation
+        Accepts Simulation object
+    filename: str
+        File name for export
+    '''
+    text = []
+
+    text.append('=============================\n\n')
+    text.append('Condom usage\n\n')
+    text.append('=============================\n\n')
+    text.append('# Basic data\n\n')
+    text.append('Number of people (N): {}\n\n'.format(len(obs.N)))
+    text.append('Frequency compartments: {}\n\n'.format(len(obs.modes[6].condom_rate)))
+    text.append('# Compartments\n\n')
+    text.append('All agents are separated in {} condom usage groups. They are differentiated by their usage frequency.\n\n'.format(len(obs.modes[6].condom_rate)))
+    text.append('Category: high, median, low\n\n')
+    text.append('Proportion of groups (respect with order):\n\n')
+    text.append('{}, {}, {}\n\n'.format(obs.modes[6].condom_proportion[0], obs.modes[6].condom_proportion[1], obs.modes[6].condom_proportion[2]))
+    text.append('# Risk compensation\n\n')
+    text.append('Risk compensation is represented by the frequency of condom usage at each sexual intercourse. This probabilitic value determines if the person wears condom during sexual intercourse.\n\n')
+    text.append('Category: high, median, low\n\n')
+    text.append('Frequency of groups (respect with order):\n\n')
+    text.append('{}, {}, {}\n\n'.format(obs.modes[6].condom_rate[0], obs.modes[6].condom_rate[1], obs.modes[6].condom_rate[2]))
+    text.append('# Extract data\n\n')
+    text.append('When extracting inputs parameters from this document, please the following:\n\n')
+    text.append('* Row 9: N\n')
+    text.append('* Row 21: Proportions\n')
+    text.append('* Row 31: Frequency\n')
+
+    with open(obs.filename + '-basic.txt', 'w') as f:
+        f.writelines(text)

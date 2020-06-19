@@ -75,6 +75,9 @@ class Simulation:
             write.WriteNetwork(self.partner_nwk.nwk_graph,self.filename)
             print('Graph data stored in \'{}.graphml\''.format(self.filename))
             if 6 in self.modes:
+                print('Use of condoms are included in this simulation')
+                write.WriteCondomData(self)
+                print('Basic informtion has been writen in \'{}-condom.txt\''.format(self.filename))
                 print('Condom use history is stored in \'{}-condom.csv\''.format(self.filename))
             print('Sex history stored in \'{}-sex.csv\''.format(self.filename))
         print('Relationship topology is ready for view.\n')
