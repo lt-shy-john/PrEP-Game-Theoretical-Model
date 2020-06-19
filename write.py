@@ -106,7 +106,7 @@ def WriteCondomData(obs):
     text.append('Condom usage\n\n')
     text.append('=============================\n\n')
     text.append('# Basic data\n\n')
-    text.append('Number of people (N): {}\n\n'.format(len(obs.N)))
+    text.append('Number of agents (N): {}\n\n'.format(len(obs.N)))
     text.append('Frequency compartments: {}\n\n'.format(len(obs.modes[6].condom_rate)))
     text.append('# Compartments\n\n')
     text.append('All agents are separated in {} condom usage groups. They are differentiated by their usage frequency.\n\n'.format(len(obs.modes[6].condom_rate)))

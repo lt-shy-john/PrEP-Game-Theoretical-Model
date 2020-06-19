@@ -531,7 +531,8 @@ class Mode52(Mode):
         self.partner_nwk.nwk_graph = nx.generators.random_graphs.barabasi_albert_graph(len(self.people), self.m)
 
         # Relabel nodes to People objects
-        self.partner_nwk.nwk_graph = nx.relabel_nodes(g, mapping)
+        mapping = {node: self.people[node] for node in self.partner_nwk.nwk_graph}
+        self.partner_nwk.nwk_graph = nx.relabel_nodes(self.partner_nwk.nwk_graph, mapping)
 
     def set_m(self, m):
         if m < 1 or m < 0:
