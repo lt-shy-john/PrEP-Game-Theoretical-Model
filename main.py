@@ -500,9 +500,10 @@ for i in range(len(sys.argv)):
                                     print('Condom use proportion unable to normalise, changed to default value.')
                                     mode06_p_config = [3,4,3]
 
+                                mode06()
+                                # Reset the proportion 
                                 mode06.set_population(input=mode06_p_config)
 
-                                mode06()
                                 if mode06.flag == 'X':
                                     modes[6] = mode06
                                 else:
