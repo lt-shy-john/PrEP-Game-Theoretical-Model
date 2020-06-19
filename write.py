@@ -124,5 +124,24 @@ def WriteCondomData(obs):
     text.append('* Row 21: Proportions\n')
     text.append('* Row 31: Frequency\n')
 
-    with open(obs.filename + '-basic.txt', 'w') as f:
+    with open(obs.filename + '-condom.txt', 'w') as f:
         f.writelines(text)
+
+def WriteNetworkData(obs):
+    '''
+    Save basic network information.
+
+    Parameters
+    ----------
+    obs: Simulation
+        Accepts Simulation object
+    filename: str
+        File name for export
+    '''
+    text = []
+
+    text.append('=============================\n\n')
+    text.append('Condom usage\n\n')
+    text.append('=============================\n\n')
+    text.append('# Basic data\n\n')
+    text.append('Number of agents (N): {}\n\n'.format(len(obs.N)))
