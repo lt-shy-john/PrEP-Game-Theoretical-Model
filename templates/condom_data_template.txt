@@ -1,0 +1,39 @@
+=============================
+
+Condom usage
+
+=============================
+
+# Basic data
+
+Number of people (N): {}
+
+Frequency compartments: {3}
+
+# Compartments
+
+All agents are separeted in 3 condom usage groups. They are differentiated by their usage frequency.
+
+Category: high, median, low
+
+Proportion of groups (respect with order):
+
+{}, {}, {}
+
+# Risk compensation
+
+Risk compensation is represented by the frequency of condom usage at each sexual intercourse. This probabilitic value determines if the person wears condom during sexual intercourse.
+
+Category: high, median, low
+
+Frequency of groups (respect with order):
+
+{}, {}, {}
+
+# Extract data
+
+When extracting inputs parameters from this document, please the following:
+
+* Row 9: N
+* Row 21: Proportions
+* Row 31: Frequency

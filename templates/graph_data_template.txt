@@ -1,0 +1,26 @@
+=============================
+
+Network topology information
+
+=============================
+
+# Basic data
+
+* Number of agents (N): {}
+
+# Global statistical information
+
+* Network density: {}
+* Number of edges: {}
+* Diameter: {}
+* Average distance: {}
+* Network heterogeneity: {}
+* Clustering coefficient: {}
+* Closeness: {}
+* Betweeness: {}
+* Scale free coefficient: {}
+
+* Average neighbours: {}
+* Assortativity: {}
+
+* Number of singletons: {}
